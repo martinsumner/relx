@@ -772,20 +772,19 @@ case "$1" in
                 shift
                 START_OPTION="console"
                 HEART_OPTION="daemon"
+                CMD_STATUS="active"
                 ;;
             daemon_boot)
                 shift
                 START_OPTION="console_boot"
                 HEART_OPTION="daemon_boot"
+                CMD_STATUS="active"
                 ;;
             start)
-                # TODO, add here the right annoying message asking users to consider
-                # instead using systemd or some such other init system
-                echo "'start' has been deprecated, replaced by 'daemon' and will be removed in the short-term, please consult rebar3.org on why you should be"\
-                     "using 'foreground' and an init tool such as 'systemd'"
                 shift
                 START_OPTION="console"
                 HEART_OPTION="daemon"
+                CMD_STATUS="deprecated"
                 ;;
         esac
 
@@ -806,6 +805,16 @@ case "$1" in
         mkdir -p "$RUNNER_LOG_DIR"
 
         relx_run_hooks "$PRE_START_HOOKS"
+
+        DEPRECATED_START_MESSAGE=${DEPRECATED_START_MESSAGE:-"'start' has been deprecated, replaced by 'daemon' "\
+                    "and will be removed in the short-term, please consult rebar3.org on why you should be"\
+                    "using 'foreground' and an init tool such as 'systemd'"}
+        
+        if [ "$CMD_STATUS" = "deprecated"];
+        then
+            echo $DEPRECATED_START_MESSAGE
+        fi
+
         "$BINDIR/run_erl" -daemon "$PIPE_DIR" "$RUNNER_LOG_DIR" \
                           "exec \"$RELEASE_ROOT_DIR/bin/$REL_NAME\" \"$START_OPTION\" $ARGS --relx-disable-hooks"
 
