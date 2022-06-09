@@ -527,6 +527,7 @@ relx_run_hooks() {
         # shellcheck disable=SC2046
         set $(echo "$hook" | sed -e 's/|/ /g')
         HOOK_SCRIPT=$1; shift
+        echo "Running hook script $HOOK_SCRIPT"
         # all hook locations are expected to be
         # relative to the start script location
         # shellcheck disable=SC1090,SC2240
