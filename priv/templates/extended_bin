@@ -250,7 +250,7 @@ relx_get_pid() {
 
 ping_or_exit() {
     if ! erl_rpc erlang is_alive > /dev/null 2>&1; then
-        echo "Node is not running!"
+        echo "Node ${NAME} is not responding to pings"
         exit 1
     fi
 }
@@ -863,6 +863,9 @@ case "$1" in
         ;;
 
     pid)
+        ## See if the VM is alive
+        ping_or_exit
+
         ## Get the VM's pid
         if ! relx_get_pid; then
             exit 1
