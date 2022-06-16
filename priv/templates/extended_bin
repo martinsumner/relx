@@ -69,7 +69,7 @@ PRE_INSTALL_UPGRADE_HOOKS="{{{ pre_install_upgrade_hooks }}}"
 POST_INSTALL_UPGRADE_HOOKS="{{{ post_install_upgrade_hooks }}}"
 STATUS_HOOK="{{{ status_hook }}}"
 EXTENSIONS="{{{ extensions }}}"
-USE_NODETOOL="${USE_NODETOOL:-{{{ use_nodetool }}}"
+USE_NODETOOL="${USE_NODETOOL:-{{{ use_nodetool }}}}"
 
 relx_usage() {
     command="$1"
@@ -222,7 +222,7 @@ find_erts_dir() {
 find_erl_call() {
     # users who depend on stdout when running rpc calls must still use nodetool
     # so we have an overload option to force use of nodetool instead of erl_call
-    if [ "$USE_NODETOOL" ]; then
+    if [ "$USE_NODETOOL" = "true" ]; then
         ERL_RPC=relx_nodetool
     else
         # only OTP-23 and above have erl_call in the erts bin directory
