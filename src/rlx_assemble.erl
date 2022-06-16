@@ -334,9 +334,12 @@ write_start_scripts_for(Type, Release, OutputDir, State) ->
                                              rlx_state:extended_start_script_hooks(State),
                                              State),
                         Extensions = rlx_state:extended_start_script_extensions(State),
+                        UseNodeTool = rlx_state:use_nodetool(State),
                         extended_bin_file_contents(Type, RelName, RelVsn,
                                                    rlx_release:erts(Release),
-                                                   Hooks, Extensions)
+                                                   Hooks,
+                                                   Extensions,
+                                                   UseNodeTool)
                 end,
 
     [write_start_script(BaseName, Type, StartFile)
@@ -985,7 +988,8 @@ bin_file_contents(Type, RelName, RelVsn, ErtsVsn) ->
     render(Template, [{rel_name, RelName}, {rel_vsn, RelVsn},
                       {erts_vsn, ErtsVsn}]).
 
-extended_bin_file_contents(Type, RelName, RelVsn, ErtsVsn, Hooks, Extensions) ->
+
+extended_bin_file_contents(Type, RelName, RelVsn, ErtsVsn, Hooks, Extensions, UseNodeTool) ->
     Template = case Type of
                    unix -> extended_bin;
                    powershell -> extended_bin_windows_ps;
@@ -1001,6 +1005,7 @@ extended_bin_file_contents(Type, RelName, RelVsn, ErtsVsn, Hooks, Extensions) ->
     PostInstallUpgradeHooks = rlx_string:join(proplists:get_value(post_install_upgrade,
                                                  Hooks, []), " "),
     StatusHook = rlx_string:join(proplists:get_value(status, Hooks, []), " "),
+    
     {ExtensionsList1, ExtensionDeclarations1} =
         lists:foldl(fun({Name, Script},
                         {ExtensionsList0, ExtensionDeclarations0}) ->
@@ -1026,7 +1031,8 @@ extended_bin_file_contents(Type, RelName, RelVsn, ErtsVsn, Hooks, Extensions) ->
                       {post_install_upgrade_hooks, PostInstallUpgradeHooks},
                       {status_hook, StatusHook},
                       {extensions, ExtensionsList},
-                      {extension_declarations, ExtensionDeclarations}]).
+                      {extension_declarations, ExtensionDeclarations},
+                      {use_nodetool, UseNodeTool}]).
 
 install_upgrade_escript_contents() ->
     render(install_upgrade_escript).

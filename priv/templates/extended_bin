@@ -69,6 +69,7 @@ PRE_INSTALL_UPGRADE_HOOKS="{{{ pre_install_upgrade_hooks }}}"
 POST_INSTALL_UPGRADE_HOOKS="{{{ post_install_upgrade_hooks }}}"
 STATUS_HOOK="{{{ status_hook }}}"
 EXTENSIONS="{{{ extensions }}}"
+USE_NODETOOL="${USE_NODETOOL:-{{{ use_nodetool }}}"
 
 relx_usage() {
     command="$1"

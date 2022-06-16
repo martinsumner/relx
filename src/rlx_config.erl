@@ -44,6 +44,8 @@ load({dev_mode, false}, {ok, State0}) ->
 load({dev_mode, true}, {ok, State0}) ->
     {ok, State1} = load({mode, dev}, {ok, State0}),
     {ok, rlx_state:dev_mode(State1, true)};
+load({use_nodetool, UNT}, {ok, State0}) ->
+    {ok, rlx_state:use_nodetool(State0, UNT)};
 load({upfrom, UpFrom}, {ok, State0}) ->
     {ok, rlx_state:upfrom(State0, UpFrom)};
 load({include_src, IncludeSrc}, {ok, State0}) ->

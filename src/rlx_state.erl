@@ -56,6 +56,8 @@
          dev_mode/2,
          mode/1,
          mode/2,
+         use_nodetool/1,
+         use_nodetool/2,
          include_src/1,
          include_src/2,
          include_erts/1,
@@ -141,6 +143,8 @@
                   dev_mode=false :: boolean(),
                   %% mode toggles multiple configuration values at once
                   mode=prod :: mode() | undefined,
+
+                  use_nodetool=false :: boolean(),
 
                   %% default check is for sasl 3.5 and above
                   %% version 3.5 of sasl has systools with changes for relx
@@ -320,6 +324,16 @@ dev_mode(S, true) ->
               mode=dev};
 dev_mode(S, DevMode) ->
     S#state_t{dev_mode=DevMode}.
+
+-spec use_nodetool(t()) -> boolean().
+use_nodetool(#state_t{use_nodetool=UseNodeTool}) ->
+    UseNodeTool.
+
+-spec use_nodetool(t(), boolean()) -> t().
+use_nodetool(S, true) ->
+    S#state_t{use_nodetool=true};
+use_nodetool(S, _False) ->
+    S#state_t{use_nodetool=false}.
 
 -spec mode(t()) -> mode().
 mode(#state_t{mode=Mode}) ->
