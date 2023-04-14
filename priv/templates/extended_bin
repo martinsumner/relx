@@ -69,6 +69,7 @@ PRE_INSTALL_UPGRADE_HOOKS="{{{ pre_install_upgrade_hooks }}}"
 POST_INSTALL_UPGRADE_HOOKS="{{{ post_install_upgrade_hooks }}}"
 STATUS_HOOK="{{{ status_hook }}}"
 EXTENSIONS="{{{ extensions }}}"
+USE_NODETOOL="${USE_NODETOOL:-{{{ use_nodetool }}}}"
 
 relx_usage() {
     command="$1"
@@ -221,7 +222,7 @@ find_erts_dir() {
 find_erl_call() {
     # users who depend on stdout when running rpc calls must still use nodetool
     # so we have an overload option to force use of nodetool instead of erl_call
-    if [ "$USE_NODETOOL" ]; then
+    if [ "$USE_NODETOOL" = "true" ]; then
         ERL_RPC=relx_nodetool
     else
         # only OTP-23 and above have erl_call in the erts bin directory
@@ -250,7 +251,7 @@ relx_get_pid() {
 
 ping_or_exit() {
     if ! erl_rpc erlang is_alive > /dev/null 2>&1; then
-        echo "Node is not running!"
+        echo "Node ${NAME} is not responding to pings"
         exit 1
     fi
 }
@@ -777,20 +778,19 @@ case "$1" in
                 shift
                 START_OPTION="console"
                 HEART_OPTION="daemon"
+                CMD_STATUS="active"
                 ;;
             daemon_boot)
                 shift
                 START_OPTION="console_boot"
                 HEART_OPTION="daemon_boot"
+                CMD_STATUS="active"
                 ;;
             start)
-                # TODO, add here the right annoying message asking users to consider
-                # instead using systemd or some such other init system
-                echo "'start' has been deprecated, replaced by 'daemon' and will be removed in the short-term, please consult rebar3.org on why you should be"\
-                     "using 'foreground' and an init tool such as 'systemd'"
                 shift
                 START_OPTION="console"
                 HEART_OPTION="daemon"
+                CMD_STATUS="deprecated"
                 ;;
         esac
 
@@ -811,6 +811,16 @@ case "$1" in
         mkdir -p "$RUNNER_LOG_DIR"
 
         relx_run_hooks "$PRE_START_HOOKS"
+
+        DEPRECATED_START_MESSAGE=${DEPRECATED_START_MESSAGE:-"'start' has been deprecated, replaced by 'daemon' "\
+                    "and will be removed in the short-term, please consult rebar3.org on why you should be"\
+                    "using 'foreground' and an init tool such as 'systemd'"}
+        
+        if [ "$CMD_STATUS" = "deprecated" ];
+        then
+            echo $DEPRECATED_START_MESSAGE
+        fi
+
         "$BINDIR/run_erl" -daemon "$PIPE_DIR" "$RUNNER_LOG_DIR" \
                           "exec \"$RELEASE_ROOT_DIR/bin/$REL_NAME\" \"$START_OPTION\" $ARGS --relx-disable-hooks"
 
@@ -859,6 +869,9 @@ case "$1" in
         ;;
 
     pid)
+        ## See if the VM is alive
+        ping_or_exit
+
         ## Get the VM's pid
         if ! relx_get_pid; then
             exit 1
